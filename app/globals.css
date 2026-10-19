@@ -1,0 +1,11 @@
+@tailwind base;@tailwind components;@tailwind utilities;
+body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;margin:0;background:#0b0b12}
+.theme{background:var(--bg);color:var(--text);min-height:100vh;transition:background-color .45s ease,color .45s ease}
+.card{background:var(--card);border:1px solid var(--line);transition:background-color .45s ease,border-color .45s ease}
+.muted{color:var(--muted)}.acc{color:var(--accent)}.acc2{color:var(--accent2)}
+.btn{background:var(--accent);color:var(--on)}
+.ghost{background:color-mix(in srgb,var(--text) 10%,transparent)}
+.bar{background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.hero{background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 20%,transparent),transparent 65%);border:1px solid var(--line)}
+.num{font-variant-numeric:tabular-nums}
+.pill{transition:background-color .25s,color .25s,border-color .25s}
