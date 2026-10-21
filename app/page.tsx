@@ -40,14 +40,17 @@ const Crest=({src}:{src?:string})=>src?<img src={src} alt="" loading="lazy" refe
 
 function MatchRow({m}:{m:Match}){
   const live=isLive(m),done=m.status==="FULL_TIME",sc=m.hg!==null,{find,play}=useContext(HL),v=done?find(m):undefined;
-  return <div className="py-1.5 text-sm" style={live?{color:"var(--accent)"}:undefined}>
+  const meta=live?`● ${m.minute??"LIVE"}`:done?"FT":m.status==="UPCOMING"?fmt(m.kickoff):m.status.replace("_"," ");
+  const btn=v&&<button onClick={()=>play(v)} className="btn rounded px-2 py-0.5 font-semibold">▶ Highlights</button>;
+  return <div className="py-2 text-sm" style={live?{color:"var(--accent)"}:undefined}>
     <div className="flex items-center gap-2">
-      <span className="flex flex-1 items-center justify-end gap-1.5 truncate text-right"><span className="truncate">{m.home}</span><Crest src={m.hl}/></span>
-      <span className="num w-14 text-center font-bold">{sc?`${m.hg} – ${m.ag}`:"vs"}</span>
-      <span className="flex flex-1 items-center gap-1.5 truncate"><Crest src={m.al}/><span className="truncate">{m.away}</span></span>
-      <span className="muted w-28 text-right text-xs">{live?`● ${m.minute??"LIVE"}`:done?"FT":m.status==="UPCOMING"?fmt(m.kickoff):m.status.replace("_"," ")}</span>
-      <span className="w-24 text-right text-xs">{v&&<button onClick={()=>play(v)} className="btn rounded px-2 py-0.5 font-semibold">▶ Highlights</button>}</span>
+      <span className="flex min-w-0 flex-1 items-center justify-end gap-1.5 text-right"><span className="break-words leading-tight sm:truncate">{m.home}</span><Crest src={m.hl}/></span>
+      <span className="num w-14 shrink-0 text-center font-bold">{sc?`${m.hg} – ${m.ag}`:"vs"}</span>
+      <span className="flex min-w-0 flex-1 items-center gap-1.5"><Crest src={m.al}/><span className="break-words leading-tight sm:truncate">{m.away}</span></span>
+      <span className="muted hidden w-28 shrink-0 text-right text-xs sm:block">{meta}</span>
+      <span className="hidden w-24 shrink-0 text-right text-xs sm:block">{btn}</span>
     </div>
+    <div className="muted mt-1 flex items-center justify-center gap-3 text-xs sm:hidden"><span>{meta}</span>{btn}</div>
     {m.note&&<div className="muted text-center text-xs">{m.note}</div>}
   </div>;
 }
@@ -83,13 +86,13 @@ function Table({comp,groups,ms}:{comp:Comp;groups:Group[];ms:Match[]}){
     const letter=multi?g.name.replace("Group ","")[0]:undefined;
     return <div key={g.name} className="card overflow-x-auto rounded-xl p-3">
       {multi&&<div className="acc mb-1 text-sm font-semibold">{g.name}</div>}
-      <table className="num w-full text-sm" style={{minWidth:multi?340:560}}>
-        <thead className="muted text-xs"><tr><th className="text-left">#</th><th className="text-left">{comp.kind==="groups"?"Team":"Club"}</th>{["P","W","D","L",...(multi?[]:["GF","GA"]),"GD","Pts"].map(h=><th key={h} className="w-9">{h}</th>)}{!multi&&<th className="pl-3 text-left">Form</th>}</tr></thead>
+      <table className={`num w-full text-sm ${multi?"min-w-[340px]":"sm:min-w-[560px]"}`}>
+        <thead className="muted text-xs"><tr><th className="text-left">#</th><th className="text-left">{comp.kind==="groups"?"Team":"Club"}</th>{["P","W","D","L",...(multi?[]:["GF","GA"]),"GD","Pts"].map(h=><th key={h} className={`w-9 ${h==="GF"||h==="GA"?"hidden sm:table-cell":""}`}>{h}</th>)}{!multi&&<th className="hidden pl-3 text-left sm:table-cell">Form</th>}</tr></thead>
         <tbody>{g.rows.map(r=>{const d=relevant(r.zone,letter),z=zoneOf(d);if(d&&z!=="n")legend.set(d,z);
           return <tr key={r.team} className="text-center" style={{borderLeft:`4px solid ${ZC[z]}`}}>
           <td className="pl-2 text-left">{r.pos}</td><td className="py-1 text-left"><span className="inline-flex items-center gap-1.5"><Crest src={r.logo}/>{r.team}</span></td>
-          <td>{r.p}</td><td>{r.w}</td><td>{r.d}</td><td>{r.l}</td>{!multi&&<><td>{r.gf}</td><td>{r.ga}</td></>}<td>{r.gd>0?`+${r.gd}`:r.gd}</td><td className="font-bold">{r.pts}</td>
-          {!multi&&<td className="pl-3 text-left"><span className="inline-flex gap-1">{(form.get(r.team)??[]).slice(-5).map((f,i)=><span key={i} className="inline-block h-4 w-4 rounded text-center text-[10px] leading-4 text-white" style={{background:FCOL[f]}}>{f}</span>)}</span></td>}</tr>})}</tbody></table>
+          <td>{r.p}</td><td>{r.w}</td><td>{r.d}</td><td>{r.l}</td>{!multi&&<><td className="hidden sm:table-cell">{r.gf}</td><td className="hidden sm:table-cell">{r.ga}</td></>}<td>{r.gd>0?`+${r.gd}`:r.gd}</td><td className="font-bold">{r.pts}</td>
+          {!multi&&<td className="hidden pl-3 text-left sm:table-cell"><span className="inline-flex gap-1">{(form.get(r.team)??[]).slice(-5).map((f,i)=><span key={i} className="inline-block h-4 w-4 rounded text-center text-[10px] leading-4 text-white" style={{background:FCOL[f]}}>{f}</span>)}</span></td>}</tr>})}</tbody></table>
     </div>});
   return <div>
     {multi&&<div className="mb-3 flex gap-2">{["A","B","C","D"].map(l=><Tab key={l} on={lg===l} onClick={()=>setLg(l)}>League {l}</Tab>)}</div>}
@@ -202,7 +205,7 @@ export default function App(){
   if(!comp)return <div className="theme" style={{background:"#0b0b12"}}/>;
   return <div className="theme" style={comp.theme as React.CSSProperties}>
     <nav className="bar sticky top-0 z-40"><div className="mx-auto flex max-w-6xl items-center gap-3 overflow-x-auto px-4 py-2">
-      <span className="acc shrink-0 text-sm font-extrabold tracking-wide">⚽ FOOTBALL TRACKER</span>
+      <span className="acc shrink-0 text-sm font-extrabold tracking-wide">⚽<span className="hidden sm:inline"> FOOTBALL TRACKER</span></span>
       {GROUPED.map(g=><div key={g} className="flex shrink-0 items-center gap-1.5 pl-3" style={{borderLeft:"1px solid var(--line)"}}>
         <span className="muted hidden text-[10px] uppercase tracking-wider lg:inline">{g}</span>
         {COMPS.filter(c=>c.cat===g).map(c=><button key={c.id} onClick={()=>pick(c.id)} className={`pill shrink-0 whitespace-nowrap rounded-full px-3 py-1.5 text-sm ${c.id===comp.id?"btn font-semibold":"ghost"}`}>{c.icon} {c.short}</button>)}
